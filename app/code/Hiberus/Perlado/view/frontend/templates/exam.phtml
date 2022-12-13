@@ -1,0 +1,28 @@
+<?php
+
+/** @var $block Hiberus\Perlado\Block\Exam */
+
+?>
+
+<h2>Lista de Notas</h2>
+<ul>
+<?php foreach ($block->getList() as $exam): ?>
+
+    <li>First Name: <?= $exam->getFirstName()?> Last Name: <?= $exam->getLastName()?> Mark: <span class="marks"> <?= (float)$exam->getMark()?> </span></li>
+
+<?php endforeach;?>
+</ul>
+    <ul>
+        Average : <span class="average"> <?= $block->getAverage()?> </span>
+    </ul>
+
+
+<button class="button" id="hide-marks"
+        data-mage-init='{"Hiberus_Perlado/js/hide-marks":{}}'>Show/Hide
+</button>
+
+<button class="button" id="best-mark"
+        data-mage-init='{"Hiberus_Perlado/js/best-mark":{}}'>Best Mark
+</button>
+
+<div id="best" hidden><?= $block->getBest()?></div>

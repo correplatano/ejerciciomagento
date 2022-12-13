@@ -1,0 +1,95 @@
+version: "3.7"
+x-toolname: "hiberus-magento"
+services:
+  phpfpm:
+    image: hiberusmagento/php:8.1-buster
+    volumes: &appvolumes
+      - sockdata:/sock
+      - ~/.composer:/var/www/.composer:cached
+      
+    environment:
+      PHP_IDE_CONFIG: serverName=localhost
+      COMPOSER_VERSION: 2
+    depends_on:
+      - db
+      - search
+      - redis
+      - mailhog
+      - rabbitmq
+      
+  nginx:
+    image: hiberusmagento/nginx:1.18
+    volumes: *appvolumes
+    depends_on:
+      - phpfpm
+
+  db:
+    image: hiberusmagento/mariadb:10.4
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: magento
+      MYSQL_USER: magento
+      MYSQL_PASSWORD: magento
+    command: [ '--max_allowed_packet=64M', '--default-authentication-plugin=mysql_native_password', '--sql_mode=STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' ]
+    volumes:
+      - dbdata:/var/lib/mysql
+
+  search:
+    image: hiberusmagento/search:1.2-opensearch
+    environment:
+      - discovery.type=single-node
+    volumes:
+      - searchdata:/usr/share/elasticsearch/data
+      - opensearchdata:/usr/share/opensearch/data
+    ports:
+      - 9200:9200
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+
+  varnish:
+    image: hiberusmagento/varnish:7.1
+    tty: true
+    ports:
+      - 80:6081
+    depends_on:
+      - nginx
+
+  redis:
+    image: hiberusmagento/redis:6.2
+    volumes:
+      - redisdata:/data:delegated
+
+  mailhog:
+    image: hiberusmagento/mailhog:1
+    ports:
+      - 8025:8025
+
+  rabbitmq:
+    image: hiberusmagento/rabbitmq:3.9
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
+    volumes:
+      - rabbitmqdata:/var/lib/rabbitmq
+
+  hitch:
+    image: hiberusmagento/hitch:1.7
+    ports:
+      - 443:443
+    depends_on:
+      - varnish
+
+volumes:
+  dbdata:
+  sockdata:
+  searchdata:
+  opensearchdata:
+  redisdata:
+  rabbitmqdata:

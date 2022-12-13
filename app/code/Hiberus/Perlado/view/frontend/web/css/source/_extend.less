@@ -1,0 +1,30 @@
+@import 'lib/_mixin.less';
+
+& when (@media-common = true) {
+
+    h2 {
+        color: darkred;
+
+    };
+}
+
+.media-width(@extremum, @break) when (@extremum = 'min') and (@break = @screen__l) {
+    .page-main {
+
+        ul {
+
+            li:nth-child(even) {
+                background: #00feff;
+            }
+
+            li:nth-child(odd) {
+                background: #00ff80;
+                .margin(@margin-left-primary: 20px);
+            }
+        }
+        h2 {
+            color: #0f5293;
+
+        };
+    }
+}

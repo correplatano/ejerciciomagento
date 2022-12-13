@@ -1,0 +1,18 @@
+version: "3.7"
+
+services:
+  phpfpm:
+    volumes: &appvolumes-mac
+      - workspace:/var/www/html
+      - ./app:/var/www/html/app:cached
+      - ./.git:/var/www/html/.git:cached
+      - ./config:/var/www/html/config:cached
+      - ./composer.json:/var/www/html/composer.json:cached
+      - ./composer.lock:/var/www/html/composer.lock:cached
+      # {FILES_IN_GIT}
+
+  nginx:
+    volumes: *appvolumes-mac
+
+volumes:
+  workspace:
